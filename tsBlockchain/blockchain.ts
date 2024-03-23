@@ -10,25 +10,35 @@ type Block = {
 
 class Blockchain {
   chain: Block[];
-  newTransactions: Transaction[];
+  pendingTransactions: Transaction[];
 
   constructor() {
     this.chain = [];
-    this.newTransactions = [];
+    this.pendingTransactions = [];
   }
 
   createNewBlock(nonce: number, previousBlockHash: string, hash: string) {
     const newBlock: Block = {
       index: this.chain.length + 1,
       timestamp: Date.now(),
-      transactions: this.newTransactions,
+      transactions: this.pendingTransactions,
       nonce: nonce,
       hash: hash,
       previousBlockHash: previousBlockHash,
     };
-    this.newTransactions = [];
+    this.pendingTransactions = [];
     this.chain.push(newBlock);
     return newBlock;
+  }
+
+  createNewTransaction(amount: number, sender: string, recipient: string) {
+    const newTransaction = {
+      amount: amount,
+      sender: sender,
+      recipient: recipient,
+    };
+    this.pendingTransactions.push(newTransaction);
+    return this.getLastBlock()['index'] + 1;
   }
 
   getLastBlock() {
