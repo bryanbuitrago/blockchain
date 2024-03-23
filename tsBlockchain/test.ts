@@ -1,13 +1,11 @@
 import Blockchain from './blockchain';
-import { jsonStringify } from './utils';
 const bitcoin = new Blockchain();
 
 // ===<< Create New Block Tests >>===
+// Uncomment to test creating new blocks
 // bitcoin.createNewBlock(2389, '0INA90SDNF90N', '90ANDN0N90N');
 // bitcoin.createNewBlock(2389, '0INA90SDNF90N', '90ANDN0N90N');
 // bitcoin.createNewBlock(2389, '0INA90SDNF90N', '90ANDN0N90N');
-// console.log(`[BlockChain] === ${jsonStringify(bitcoin)}`);
-// ===>> ::: <<===
 
 // ===<< Create New Transaction Tests >>===
 const newBlock = bitcoin.createNewBlock(2389, '0INA90SDNF90N', '90ANDN0N90N');
@@ -16,16 +14,13 @@ const pendingTransaction = bitcoin.createNewTransaction(
   'ALEX90NANAN',
   'JEN90ANDN'
 );
-console.log(`[New Block] === ${jsonStringify(newBlock)}`);
-console.log(
-  `[Pending Transactions] === ${jsonStringify(bitcoin.pendingTransactions)}`
-);
-// ===>> ::: <<===
+
+console.log('[New Block] === ', newBlock);
+console.log('[Pending Transaction] === ', pendingTransaction);
 
 // ===<< Get Last Block Test >>===
-console.log(`[Last Block] === ${jsonStringify(bitcoin.getLastBlock())}`);
-// ===>> ::: <<===
+const lastBlock = bitcoin.getLastBlock();
+console.log('[Last Block] === ', lastBlock);
 
 // ===<< Log The BlockChain >>===
-console.log(`[BlockChain] === ${jsonStringify(bitcoin)}`);
-// ===>> ::: <<===
+console.log('[BlockChain] === ', bitcoin);
