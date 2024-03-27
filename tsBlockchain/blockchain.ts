@@ -1,4 +1,5 @@
-import sha256 from 'crypto-js/sha256';
+// import sha256 from 'crypto-js/sha256';
+import { createHash } from 'crypto';
 
 type Transaction = any;
 type Block = {
@@ -43,6 +44,7 @@ class Blockchain {
     return this.getLastBlock()['index'] + 1;
   }
 
+  // ===<< Hash Block Using Built-in Crypto Module >>===
   hashBlock(
     previousBlockHash: string,
     currentBlockData: Transaction[],
@@ -51,9 +53,22 @@ class Blockchain {
     const dataAsString = `${previousBlockHash}${nonce}${JSON.stringify(
       currentBlockData
     )}`;
-    const hash = sha256(dataAsString).toString();
+    const hash = createHash('sha256').update(dataAsString).digest('hex');
     return hash;
   }
+
+  // ===<< Hash Block Using External Crypto-JS NPM Module >>===
+  // hashBlock(
+  //   previousBlockHash: string,
+  //   currentBlockData: Transaction[],
+  //   nonce: number
+  // ) {
+  //   const dataAsString = `${previousBlockHash}${nonce}${JSON.stringify(
+  //     currentBlockData
+  //   )}`;
+  //   const hash = sha256(dataAsString).toString();
+  //   return hash;
+  // }
 
   getLastBlock() {
     return this.chain[this.chain.length - 1];
