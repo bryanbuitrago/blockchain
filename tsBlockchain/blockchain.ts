@@ -1,3 +1,5 @@
+import sha256 from 'crypto-js/sha256';
+
 type Transaction = any;
 type Block = {
   index: number;
@@ -39,6 +41,18 @@ class Blockchain {
     };
     this.pendingTransactions.push(newTransaction);
     return this.getLastBlock()['index'] + 1;
+  }
+
+  hashBlock(
+    previousBlockHash: string,
+    currentBlockData: Transaction[],
+    nonce: number
+  ) {
+    const dataAsString = `${previousBlockHash}${nonce}${JSON.stringify(
+      currentBlockData
+    )}`;
+    const hash = sha256(dataAsString).toString();
+    return hash;
   }
 
   getLastBlock() {
