@@ -70,6 +70,7 @@ class Blockchain {
   //   return hash;
   // }
 
+  // ===<< Get Last Block >>===
   getLastBlock() {
     return this.chain[this.chain.length - 1];
   }
