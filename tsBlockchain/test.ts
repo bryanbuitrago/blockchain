@@ -40,6 +40,30 @@ console.log('[Pending Transaction 2] === ', pendingTransaction2);
 console.log('[Pending Transaction 3] === ', pendingTransaction3);
 console.log('[Pending Transaction 4] === ', pendingTransaction4);
 
+// ===<< Hash Block Tests >>===
+const previousBlockHash = '90ANDN0N90N';
+const currentBlockData = [
+  {
+    amount: 10,
+    sender: 'ALEX90NANAN',
+    recipient: 'JEN90ANDN',
+  },
+  {
+    amount: 30,
+    sender: 'ALEX90NANAN',
+    recipient: 'JEN90ANDN',
+  },
+  {
+    amount: 200,
+    sender: 'ALEX90NANAN',
+    recipient: 'JEN90ANDN',
+  },
+];
+
+const nonce = 100;
+const hash = bitcoin.hashBlock(previousBlockHash, currentBlockData, nonce);
+console.log('[Hash] === ', hash);
+
 // ===<< Get Last Block Test >>===
 // const lastBlock = bitcoin.getLastBlock();
 // console.log('[Last Block] === ', lastBlock);
