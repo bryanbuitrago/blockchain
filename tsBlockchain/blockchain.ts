@@ -1,6 +1,7 @@
 // import sha256 from 'crypto-js/sha256';
 import { createHash } from 'crypto';
 
+// ===<< Type Definitions >>===
 type Transaction = any;
 type Block = {
   index: number;
@@ -11,6 +12,7 @@ type Block = {
   previousBlockHash: string;
 };
 
+// ===<< Blockchain Class >>===
 class Blockchain {
   chain: Block[];
   pendingTransactions: Transaction[];
@@ -20,6 +22,7 @@ class Blockchain {
     this.pendingTransactions = [];
   }
 
+  // ===<< Create New Block >>===
   createNewBlock(nonce: number, previousBlockHash: string, hash: string) {
     const newBlock: Block = {
       index: this.chain.length + 1,
@@ -34,6 +37,7 @@ class Blockchain {
     return newBlock;
   }
 
+  // ===<< Create New Transaction >>===
   createNewTransaction(amount: number, sender: string, recipient: string) {
     const newTransaction = {
       amount: amount,
