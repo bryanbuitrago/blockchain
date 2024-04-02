@@ -1,10 +1,24 @@
 {
+  "type": "module",
+  "nodemonConfig": {
+    "watch": [
+      "src/**/*.ts"
+    ],
+    "ext": "ts",
+    "exec": "npx ts-node --esm api.ts"
+  },
+  "scripts": {
+    "dev": "nodemon"
+  },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.11.30",
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "crypto-js": "^4.2.0"
+    "crypto-js": "^4.2.0",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0"
   }
 }
