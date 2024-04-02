@@ -20,6 +20,7 @@ class Blockchain {
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
+    this.createNewBlock(100, '0', '0');
   }
 
   // ===<< Create New Block >>===
@@ -34,6 +35,7 @@ class Blockchain {
     };
     this.pendingTransactions = [];
     this.chain.push(newBlock);
+    if (this.chain.length === 1) console.log('[Genesis Block] === ', newBlock);
     return newBlock;
   }
 
@@ -59,6 +61,17 @@ class Blockchain {
     )}`;
     const hash = createHash('sha256').update(dataAsString).digest('hex');
     return hash;
+  }
+
+  proofOfWork(previousBlockHash: string, currentBlockData: Transaction[]) {
+    let nonce = 0;
+    let hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+    while (hash.substring(0, 4) !== '0000') {
+      nonce++;
+      hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+      // console.log('[Current Hash]= ', hash);
+    }
+    return nonce;
   }
 
   // ===<< Hash Block Using External Crypto-JS NPM Module >>===
