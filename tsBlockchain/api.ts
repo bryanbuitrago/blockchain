@@ -2,15 +2,15 @@ import express from 'express';
 import Blockchain from './blockchain.js';
 import { randomUUID } from 'crypto';
 
-// Create a unique random node address for this instance of the blockchain
-const nodeAddress = randomUUID().split('-').join(''); // split('-').join('') === Remove hyphens
-console.log(`[Node Adress] === ${nodeAddress}`);
-
 // Create an instance of the Express.js server
 const app = express();
 
 // Create a new instance of the Blockchain class
 const oroCoin = new Blockchain();
+
+// Create a unique random node address for this instance of the blockchain
+const nodeAddress = randomUUID().split('-').join(''); // split('-').join('') === Remove hyphens
+console.log(`[Node Adress] === ${nodeAddress}`);
 
 // Configure the Express.js server to parse JSON and URL encoded data
 app.use(express.json());
