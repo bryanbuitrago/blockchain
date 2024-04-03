@@ -1,6 +1,9 @@
 // import sha256 from 'crypto-js/sha256';
 import { createHash } from 'crypto';
 
+// Current Node URL
+const currentNodeUrl = process.argv[3];
+
 // Type Definitions
 type Transaction = any;
 type Block = {
@@ -16,10 +19,20 @@ type Block = {
 class Blockchain {
   chain: Block[];
   pendingTransactions: Transaction[];
+  currentNodeUrl: string;
+  networkNodes: string[] = [];
 
   constructor() {
     this.chain = [];
     this.pendingTransactions = [];
+
+    // Current Node URL
+    this.currentNodeUrl = currentNodeUrl;
+
+    // Network Nodes Array
+    this.networkNodes = [];
+
+    // Create Genesis Block
     this.createNewBlock(100, '0', '0');
   }
 
