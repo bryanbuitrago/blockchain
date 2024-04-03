@@ -5,10 +5,10 @@
       "*.ts"
     ],
     "ext": "ts",
-    "exec": "npx ts-node --esm api.ts"
+    "exec": "npx ts-node --esm networkNode.ts"
   },
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon 3001"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
