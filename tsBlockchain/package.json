@@ -2,7 +2,7 @@
   "type": "module",
   "nodemonConfig": {
     "watch": [
-      "src/**/*.ts"
+      "*.ts"
     ],
     "ext": "ts",
     "exec": "npx ts-node --esm api.ts"
