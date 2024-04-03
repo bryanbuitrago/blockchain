@@ -8,7 +8,11 @@
     "exec": "npx ts-node --esm networkNode.ts"
   },
   "scripts": {
-    "dev": "nodemon 3001"
+    "node_1": "nodemon 3001",
+    "node_2": "nodemon 3002",
+    "node_3": "nodemon 3003",
+    "node_4": "nodemon 3004",
+    "node_5": "nodemon 3005"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
