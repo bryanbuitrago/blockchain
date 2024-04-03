@@ -1,3 +1,5 @@
+// Blockchain API template using TypeScript and Express.js
+// Use this template to create a simple API for a blockchain application
 import express from 'express';
 import Blockchain from './blockchain.js';
 import { randomUUID } from 'crypto';
@@ -59,6 +61,8 @@ app.get('/mine', (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log('Blockchain app listening on port 3000!');
+const port = process.argv[2];
+
+app.listen(port, () => {
+  console.log(`Blockchain App Listening on port ${port}...`);
 });
