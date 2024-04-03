@@ -1,7 +1,7 @@
 // import sha256 from 'crypto-js/sha256';
 import { createHash } from 'crypto';
 
-// ===<< Type Definitions >>===
+// Type Definitions
 type Transaction = any;
 type Block = {
   index: number;
@@ -12,7 +12,7 @@ type Block = {
   previousBlockHash: string;
 };
 
-// ===<< Blockchain Class >>===
+// Blockchain Class
 class Blockchain {
   chain: Block[];
   pendingTransactions: Transaction[];
@@ -23,7 +23,7 @@ class Blockchain {
     this.createNewBlock(100, '0', '0');
   }
 
-  // ===<< Create New Block >>===
+  // Create New Block
   createNewBlock(nonce: number, previousBlockHash: string, hash: string) {
     const newBlock: Block = {
       index: this.chain.length + 1,
@@ -39,7 +39,7 @@ class Blockchain {
     return newBlock;
   }
 
-  // ===<< Create New Transaction >>===
+  // Create New Transaction
   createNewTransaction(amount: number, sender: string, recipient: string) {
     const newTransaction = {
       amount: amount,
@@ -50,7 +50,7 @@ class Blockchain {
     return this.getLastBlock()['index'] + 1;
   }
 
-  // ===<< Hash Block Using Built-in Crypto Module >>===
+  // Hash Block Using Built-in Crypto Module
   hashBlock(
     previousBlockHash: string,
     currentBlockData: Transaction[],
@@ -74,7 +74,7 @@ class Blockchain {
     return nonce;
   }
 
-  // ===<< Hash Block Using External Crypto-JS NPM Module >>===
+  // Hash Block Using External Crypto-JS NPM Module
   // hashBlock(
   //   previousBlockHash: string,
   //   currentBlockData: Transaction[],
@@ -87,7 +87,7 @@ class Blockchain {
   //   return hash;
   // }
 
-  // ===<< Get Last Block >>===
+  // Get Last Block
   getLastBlock() {
     return this.chain[this.chain.length - 1];
   }
