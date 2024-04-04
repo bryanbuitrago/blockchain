@@ -64,6 +64,12 @@ class Blockchain {
     return this.getLastBlock()['index'] + 1;
   }
 
+  // Add Transaction To Pending Transactions
+  addTransactionToPendingTransactions(transactionObj: Transaction) {
+    this.pendingTransactions.push(transactionObj);
+    return this.getLastBlock()['index'] + 1;
+  }
+
   // Hash Block Using Built-in Crypto Module
   hashBlock(
     previousBlockHash: string,
