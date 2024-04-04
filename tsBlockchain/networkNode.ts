@@ -1,6 +1,7 @@
 import express from 'express';
 import Blockchain from './blockchain.js';
 import { randomUUID } from 'crypto';
+import fetch from 'node-fetch';
 
 // Create an instance of the Express.js server
 const app = express();
@@ -60,8 +61,10 @@ app.get('/mine', (req, res) => {
 // Register a new node and broadcast it to the network
 app.post('/register-and-broadcast-node', async (req, res) => {
   const { newNodeUrl } = req.body;
+  console.log('[New Node URL] === ', newNodeUrl);
   if (!oroCoin.networkNodes.includes(newNodeUrl)) {
     oroCoin.networkNodes.push(newNodeUrl);
+    console.log('[Network Nodes] === ', oroCoin.networkNodes);
   }
 
   //   Register the new node with the network
@@ -76,24 +79,29 @@ app.post('/register-and-broadcast-node', async (req, res) => {
         return response.json();
       }
     );
+    // Before executing Promise.all, ensure newNodeUrl is not included in the bulk registration
+
+    const otherNodes = oroCoin.networkNodes.filter((url) => url !== newNodeUrl);
 
     await Promise.all(regNodesPromises).then((data) => {
       const allNetworkNodes = [...data, oroCoin.currentNodeUrl];
+      console.log('[All Network Nodes] === ', allNetworkNodes);
       const bulkRegisterOptions = {
         method: 'POST',
-        body: JSON.stringify({ allNetworkNodes }),
+        body: JSON.stringify({
+          allNetworkNodes: [...otherNodes, oroCoin.currentNodeUrl],
+        }),
         headers: { 'Content-Type': 'application/json' },
       };
-      return fetch(
-        oroCoin.currentNodeUrl + '/register-nodes-bulk',
-        bulkRegisterOptions
-      );
+      return fetch(newNodeUrl + '/register-nodes-bulk', bulkRegisterOptions);
     });
     res.json({ note: 'New node registered with network successfully.' });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ note: 'Error registering new node with network.', error });
+  } catch (error: any) {
+    console.error(error); // Log the error to the console for debugging
+    res.status(500).json({
+      note: 'Error registering new node with network.',
+      error: error.message || error.toString(),
+    });
   }
 });
 
@@ -101,14 +109,26 @@ app.post('/register-and-broadcast-node', async (req, res) => {
 app.post('/register-node', (req, res) => {
   const { newNodeUrl } = req.body;
   const nodeNotAlreadyPresent = !oroCoin.networkNodes.includes(newNodeUrl);
-  const notCurrentNode = oroCoin.currentNodeUrl !== newNodeUrl;
-  if (nodeNotAlreadyPresent && notCurrentNode) {
+  const notCurrentNodeUrl = oroCoin.currentNodeUrl !== newNodeUrl;
+  if (nodeNotAlreadyPresent && notCurrentNodeUrl) {
     oroCoin.networkNodes.push(newNodeUrl);
   }
   res.json({ note: 'New node registered successfully.' });
 });
 
-app.post('/register-nodes-bulk', (req, res) => {});
+// Register multiple nodes at once
+app.post('/register-nodes-bulk', (req, res) => {
+  const { allNetworkNodes } = req.body;
+  allNetworkNodes.forEach((networkNodeUrl: string) => {
+    const nodeNotAlreadyPresent =
+      !oroCoin.networkNodes.includes(networkNodeUrl);
+    const notCurrentNodeUrl = oroCoin.currentNodeUrl !== networkNodeUrl;
+    if (nodeNotAlreadyPresent && notCurrentNodeUrl) {
+      oroCoin.networkNodes.push(networkNodeUrl);
+    }
+  });
+  res.json({ note: 'Bulk registration successful.' });
+});
 
 // Start the Express.js server
 const port = process.argv[2];
