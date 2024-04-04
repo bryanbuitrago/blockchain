@@ -31,6 +31,39 @@ app.post('/transaction', (req, res) => {
   });
 });
 
+app.post('/transaction/broadcast', async (req, res) => {
+  const { amount, sender, recipient } = req.body;
+  const newTransaction = oroCoin.createNewTransaction(
+    amount,
+    sender,
+    recipient
+  );
+  oroCoin.addTransactionToPendingTransactions(newTransaction);
+
+  // Broadcast the new transaction to all the other nodes in the network
+  try {
+    const requestPromises = oroCoin.networkNodes.map((networkNodeUrl) => {
+      const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify(newTransaction),
+        headers: { 'Content-Type': 'application/json' },
+      };
+      // Broadcast the transaction to the network
+      return fetch(networkNodeUrl + '/transaction', requestOptions);
+    });
+    // Execute all the requests in parallel
+    await Promise.all(requestPromises).then(() => {
+      res.json({ note: 'Transaction created and broadcasted successfully.' });
+    });
+  } catch (error: any) {
+    console.error(error); // Log the error to the console for debugging
+    res.status(500).json({
+      note: 'Error creating and broadcasting transaction.',
+      error: error.message || error.toString(),
+    });
+  }
+});
+
 // Mine a new block
 app.get('/mine', (req, res) => {
   const lastBlock = oroCoin.getLastBlock();
@@ -67,8 +100,8 @@ app.post('/register-and-broadcast-node', async (req, res) => {
     console.log('[Network Nodes] === ', oroCoin.networkNodes);
   }
 
-  //   Register the new node with the network
   try {
+    // Register the new node with the other nodes in the network
     const regNodesPromises = oroCoin.networkNodes.map(
       async (networkNodeUrl) => {
         const response = await fetch(networkNodeUrl + '/register-node', {
@@ -79,10 +112,11 @@ app.post('/register-and-broadcast-node', async (req, res) => {
         return response.json();
       }
     );
-    // Before executing Promise.all, ensure newNodeUrl is not included in the bulk registration
 
+    // Before executing Promise.all, ensure newNodeUrl is not included in the bulk registration
     const otherNodes = oroCoin.networkNodes.filter((url) => url !== newNodeUrl);
 
+    // Register the other nodes with the new node
     await Promise.all(regNodesPromises).then((data) => {
       const allNetworkNodes = [...data, oroCoin.currentNodeUrl];
       console.log('[All Network Nodes] === ', allNetworkNodes);
@@ -93,6 +127,7 @@ app.post('/register-and-broadcast-node', async (req, res) => {
         }),
         headers: { 'Content-Type': 'application/json' },
       };
+      // Register the new node with the other nodes
       return fetch(newNodeUrl + '/register-nodes-bulk', bulkRegisterOptions);
     });
     res.json({ note: 'New node registered with network successfully.' });
