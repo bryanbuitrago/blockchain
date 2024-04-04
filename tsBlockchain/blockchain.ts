@@ -1,5 +1,5 @@
 // import sha256 from 'crypto-js/sha256';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 // Current Node URL
 const currentNodeUrl = process.argv[3];
@@ -58,6 +58,7 @@ class Blockchain {
       amount: amount,
       sender: sender,
       recipient: recipient,
+      transactionId: randomUUID().split('-').join(''), // .split('-').join('') removes hyphens
     };
     this.pendingTransactions.push(newTransaction);
     return this.getLastBlock()['index'] + 1;
