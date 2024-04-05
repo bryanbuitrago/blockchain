@@ -1,4 +1,4 @@
-import Blockchain from './blockchain';
+import Blockchain from './blockchain.js';
 const bitcoin = new Blockchain();
 
 // ===<< Create New Block Tests >>===
