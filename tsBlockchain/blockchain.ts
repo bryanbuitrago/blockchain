@@ -60,8 +60,7 @@ class Blockchain {
       recipient: recipient,
       transactionId: randomUUID().split('-').join(''), // .split('-').join('') removes hyphens
     };
-    this.pendingTransactions.push(newTransaction);
-    return this.getLastBlock()['index'] + 1;
+    return newTransaction;
   }
 
   // Add Transaction To Pending Transactions
