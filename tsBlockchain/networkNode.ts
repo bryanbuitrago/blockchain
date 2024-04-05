@@ -24,11 +24,10 @@ app.get('/blockchain', (req, res) => {
 
 // Create a new transaction
 app.post('/transaction', (req, res) => {
-  const { amount, sender, recipient } = req.body;
-  const blockIndex = oroCoin.createNewTransaction(amount, sender, recipient);
-  res.json({
-    note: `Transaction will be added in block ${blockIndex}.`,
-  });
+  const newTransaction = req.body;
+  const blockIndex =
+    oroCoin.addTransactionToPendingTransactions(newTransaction);
+  res.json({ note: `Transaction will be added in block ${blockIndex}.` });
 });
 
 app.post('/transaction/broadcast', async (req, res) => {
