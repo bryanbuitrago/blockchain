@@ -1,7 +1,13 @@
 import express from 'express';
 import Blockchain from './blockchain.js';
+// import { broadcastNewBlock } from './networkOps.js';
+// import { rewardMiner } from './transactionOps.js';
 import { randomUUID } from 'crypto';
 import fetch from 'node-fetch';
+
+const MINING_REWARD = 12.5;
+const REWARD_SENDER_ADDRESS = '00';
+// const CURRENT_NODE_URL = process.argv[3];
 
 // Create an instance of the Express.js server
 const app = express();
@@ -64,31 +70,174 @@ app.post('/transaction/broadcast', async (req, res) => {
 });
 
 // Mine a new block
-app.get('/mine', (req, res) => {
-  const lastBlock = oroCoin.getLastBlock();
-  const previousBlockHash = lastBlock['hash'];
-  const currentBlockData = [
-    {
-      transactions: oroCoin.pendingTransactions,
-      index: lastBlock['index'] + 1,
-    },
-  ];
-  const nonce = oroCoin.proofOfWork(previousBlockHash, currentBlockData);
-  const blockHash = oroCoin.hashBlock(
-    previousBlockHash,
-    currentBlockData,
-    nonce
-  );
+app.get('/mine', async (req, res) => {
+  try {
+    const lastBlock = oroCoin.getLastBlock();
+    const previousBlockHash = lastBlock['hash'];
+    const currentBlockData = [
+      {
+        transactions: oroCoin.pendingTransactions,
+        index: lastBlock['index'] + 1,
+      },
+    ];
 
-  oroCoin.createNewTransaction(12.5, '00', nodeAddress);
+    const nonce = oroCoin.proofOfWork(previousBlockHash, currentBlockData);
+    const blockHash = oroCoin.hashBlock(
+      previousBlockHash,
+      currentBlockData,
+      nonce
+    );
 
-  const newBlock = oroCoin.createNewBlock(nonce, previousBlockHash, blockHash);
+    // Create a new block and add it to the blockchain
+    const newBlock = oroCoin.createNewBlock(
+      nonce,
+      previousBlockHash,
+      blockHash
+    );
 
-  res.json({
-    note: 'New block mined successfully',
-    block: newBlock,
-  });
+    // Broadcast the new block to the entire network and handle errors per request
+    const broadcastResults = await broadcastNewBlock(newBlock);
+    if (broadcastResults.some((result) => result.error)) {
+      throw new Error('Failed to broadcast to all nodes');
+    }
+
+    // Reward the miner for mining a new block only after successful broadcast
+    await rewardMiner(
+      REWARD_SENDER_ADDRESS,
+      oroCoin.currentNodeUrl,
+      MINING_REWARD
+    );
+
+    res.json({
+      note: 'New block mined and broadcasted successfully.',
+      block: newBlock,
+    });
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({
+      note: 'Error mining and broadcasting new block.',
+      error:
+        'An error occurred during block mining or broadcasting. Please try again.',
+    });
+  }
 });
+
+app.post('/receive-new-block', (req, res) => {
+  try {
+    const { newBlock } = req.body;
+    const lastBlock = oroCoin.getLastBlock();
+    const correctHash = lastBlock.hash === newBlock.previousBlockHash;
+    const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
+
+    if (correctHash && correctIndex) {
+      oroCoin.chain.push(newBlock);
+      oroCoin.pendingTransactions = [];
+      res.json({
+        note: 'New block received and accepted.',
+        newBlock,
+      });
+    } else {
+      res.status(400).json({
+        note: 'New block rejected.',
+        reason: 'Invalid block received.',
+      });
+    }
+  } catch (error) {
+    console.error(error); // Log the error to the console for debugging
+    res.status(500).json({
+      note: 'Error receiving new block.',
+      error: 'An error occurred while receiving the new block.',
+    });
+  }
+});
+
+async function broadcastNewBlock(newBlock: any) {
+  const requestPromises = oroCoin.networkNodes.map(async (networkNodeUrl) => {
+    try {
+      const requestOptions = {
+        method: 'POST',
+        body: JSON.stringify(newBlock),
+        headers: { 'Content-Type': 'application/json' },
+      };
+      const response = await fetch(
+        networkNodeUrl + '/receive-new-block',
+        requestOptions
+      );
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+      return { success: true };
+    } catch (error) {
+      console.error(`Error broadcasting to ${networkNodeUrl}:`, error);
+      return { error: true };
+    }
+  });
+
+  return Promise.all(requestPromises);
+}
+
+async function rewardMiner(sender: string, recipient: string, amount: number) {
+  const requestOptions = {
+    method: 'POST',
+    body: JSON.stringify({ amount, sender, recipient }),
+    headers: { 'Content-Type': 'application/json' },
+  };
+  const response = await fetch(
+    oroCoin.networkNodes[0] + '/transaction/broadcast',
+    requestOptions
+  );
+  if (!response.ok) {
+    throw new Error('Failed to reward miner. Transaction broadcast failed.');
+  }
+}
+// Mine a new block
+// app.get('/mine', async (req, res) => {
+//   try {
+//     const lastBlock = oroCoin.getLastBlock();
+//     const previousBlockHash = lastBlock['hash'];
+//     const currentBlockData = [
+//       {
+//         transactions: oroCoin.pendingTransactions,
+//         index: lastBlock['index'] + 1,
+//       },
+//     ];
+//     const nonce = oroCoin.proofOfWork(previousBlockHash, currentBlockData);
+//     const blockHash = oroCoin.hashBlock(
+//       previousBlockHash,
+//       currentBlockData,
+//       nonce
+//     );
+
+//     // oroCoin.createNewTransaction(12.5, '00', nodeAddress);
+//     const newBlock = oroCoin.createNewBlock(
+//       nonce,
+//       previousBlockHash,
+//       blockHash
+//     );
+
+//     // Broadcast the new block to the entire network and handle errors per request
+//     await broadcastNewBlock(newBlock);
+
+//     // Reward the miner for mining a new block only after successful mining and broadcasting
+//     await rewardMiner(
+//       REWARD_SENDER_ADDRESS,
+//       oroCoin.currentNodeUrl,
+//       MINING_REWARD
+//     );
+
+//     res.json({
+//       note: 'New block mined and broadcasted successfully.',
+//       block: newBlock,
+//     });
+//   } catch (error: any) {
+//     console.error(error); // Log the error to the console for debugging
+//     res.status(500).json({
+//       note: 'Error mining and broadcasting new block.',
+//       error:
+//         'An error occurred during block mining or broadcasting. Please try again.',
+//     });
+//   }
+// });
 
 // Register a new node and broadcast it to the network
 app.post('/register-and-broadcast-node', async (req, res) => {
