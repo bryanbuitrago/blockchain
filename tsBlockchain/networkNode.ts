@@ -95,13 +95,6 @@ app.get('/mine', async (req, res) => {
       currentBlockData,
       nonce
     );
-    rewardMiner(
-      MINING_REWARD,
-      REWARD_SENDER_ADDRESS,
-      // nodeAddress /* CURRENT_NODE_URL as recipient */,
-      RECIPIENT_MINER_ADDRESS // Miner's address
-      // nodeAddress
-    );
     const newBlock = oroCoin.createNewBlock(
       nonce,
       previousBlockHash,
@@ -126,6 +119,15 @@ app.get('/mine', async (req, res) => {
     });
 
     await Promise.all(requestPromises);
+
+    // Reward the miner only after successful block broadcast
+    rewardMiner(
+      MINING_REWARD,
+      REWARD_SENDER_ADDRESS,
+      // nodeAddress /* CURRENT_NODE_URL as recipient */,
+      RECIPIENT_MINER_ADDRESS // Miner's address
+      // nodeAddress
+    );
 
     res.json({
       note: 'New block mined, broadcasted, and miner rewarded successfully.',
