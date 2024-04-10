@@ -547,6 +547,12 @@ app.post('/register-nodes-bulk', (req, res) => {
   res.json({ note: 'Bulk registration successful.' });
 });
 
+app.get('/block/:blockHash', (req, res) => {});
+
+app.get('/transaction/:transactionId', (req, res) => {});
+
+app.get('/address/:address', (req, res) => {});
+
 // Start the Express.js server
 const port = process.argv[2];
 app.listen(port, () => {
