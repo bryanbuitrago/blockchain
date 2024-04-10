@@ -178,6 +178,10 @@ class Blockchain {
   //   return validChain;
   // }
 
+  getBlock(blockHash: string): Block | null {
+    return this.chain.find((block) => block.hash === blockHash) || null;
+  }
+
   getLastBlock() {
     return this.chain[this.chain.length - 1];
   }
