@@ -182,6 +182,18 @@ class Blockchain {
     return this.chain.find((block) => block.hash === blockHash) || null;
   }
 
+  getTransaction(transactionId: string): Transaction | null {
+    for (const block of this.chain) {
+      const transaction = block.transactions.find(
+        (t) => t.transactionId === transactionId
+      );
+      if (transaction) {
+        return { transaction, block };
+      }
+    }
+    return { transaction: null, block: null };
+  }
+
   getLastBlock() {
     return this.chain[this.chain.length - 1];
   }
