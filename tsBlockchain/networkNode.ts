@@ -547,7 +547,11 @@ app.post('/register-nodes-bulk', (req, res) => {
   res.json({ note: 'Bulk registration successful.' });
 });
 
-app.get('/block/:blockHash', (req, res) => {});
+app.get('/block/:blockHash', (req, res) => {
+  const { blockHash } = req.params;
+  const block = oroCoin.getBlock(blockHash);
+  res.json({ block });
+});
 
 app.get('/transaction/:transactionId', (req, res) => {});
 
