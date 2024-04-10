@@ -194,6 +194,29 @@ class Blockchain {
     return { transaction: null, block: null };
   }
 
+  getAddressData(address: string): {
+    transactions: Transaction[];
+    balance: number;
+  } {
+    const transactions: Transaction[] = [];
+    let balance = 0;
+
+    for (const block of this.chain) {
+      for (const transaction of block.transactions) {
+        if (
+          transaction.sender === address ||
+          transaction.recipient === address
+        ) {
+          transactions.push(transaction);
+          if (transaction.recipient === address) balance += transaction.amount;
+          if (transaction.sender === address) balance -= transaction.amount;
+        }
+      }
+    }
+
+    return { transactions, balance };
+  }
+
   getLastBlock() {
     return this.chain[this.chain.length - 1];
   }
