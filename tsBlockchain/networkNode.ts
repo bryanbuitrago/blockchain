@@ -437,7 +437,92 @@ app.post('/register-and-broadcast-node', async (req, res) => {
   }
 });
 
-// Register a node with the network
+// Consensus Algorithm
+app.get('/consensus', async (req, res) => {
+  const requestPromises = oroCoin.networkNodes.map((networkNodeUrl) => {
+    return fetch(networkNodeUrl + '/blockchain').then((response) =>
+      response.json()
+    ); // Parse the JSON body of the response
+  });
+  await Promise.all(requestPromises).then((blockchains) => {
+    const currentChainLength = oroCoin.chain.length;
+    console.log(
+      '[Current Chain Length Inside Promise.all()] === ',
+      currentChainLength
+    );
+    let maxChainLength = currentChainLength;
+    let newLongestChain = null;
+    let newPendingTransactions = null;
+
+    blockchains.forEach((blockchain: any) => {
+      const { chain, pendingTransactions } = blockchain;
+      console.log('[Chain Length Inside forEach()] === ', chain.length);
+      if (chain.length > maxChainLength) {
+        maxChainLength = chain.length;
+        console.log('[Max Chain Length Inside if()] === ', maxChainLength);
+        newLongestChain = chain;
+        newPendingTransactions = pendingTransactions;
+      }
+    });
+
+    if (
+      !newLongestChain ||
+      (newLongestChain && !oroCoin.chainIsValid(newLongestChain))
+    ) {
+      res.json({
+        note: 'Current chain has not been replaced.',
+        chain: oroCoin.chain,
+      });
+    } else {
+      oroCoin.chain = newLongestChain;
+      oroCoin.pendingTransactions = newPendingTransactions || [];
+      res.json({
+        note: 'This chain has been replaced.',
+        chain: oroCoin.chain,
+      });
+    }
+  });
+});
+
+// Consensus Algorithm
+// app.get('/consensus', async (req, res) => {
+//   const requestPromises = oroCoin.networkNodes.map((networkNodeUrl) => {
+//     return fetch(networkNodeUrl + '/blockchain');
+//   });
+//   await Promise.all(requestPromises).then((blockchains) => {
+//     const currentChainLength = oroCoin.chain.length;
+//     let maxChainLength = currentChainLength;
+//     let newLongestChain = null;
+//     let newPendingTransactions = null;
+
+//     blockchains.forEach((blockchain: any) => {
+//       const { chain, pendingTransactions } = blockchain;
+//       if (chain.length > maxChainLength) {
+//         maxChainLength = chain.length;
+//         newLongestChain = chain;
+//         newPendingTransactions = pendingTransactions;
+//       }
+//     });
+
+//     if (
+//       !newLongestChain ||
+//       (newLongestChain && !oroCoin.chainIsValid(newLongestChain))
+//     ) {
+//       res.json({
+//         note: 'Current chain has not been replaced.',
+//         chain: oroCoin.chain,
+//       });
+//     } else {
+//       oroCoin.chain = newLongestChain;
+//       oroCoin.pendingTransactions = newPendingTransactions || [];
+//       res.json({
+//         note: 'This chain has been replaced.',
+//         chain: oroCoin.chain,
+//       });
+//     }
+//   });
+// });
+
 app.post('/register-node', (req, res) => {
   const { newNodeUrl } = req.body;
   const nodeNotAlreadyPresent = !oroCoin.networkNodes.includes(newNodeUrl);
